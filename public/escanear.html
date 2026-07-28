@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Escanear credencial</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1>📷 Escanear</h1>
+      <div class="subtitulo">Apunta la cámara al QR de la credencial</div>
+    </div>
+
+    <div class="contenido">
+      <div class="tarjeta">
+        <div id="lector-qr" style="width:100%;"></div>
+        <div id="resultado"></div>
+      </div>
+
+      <div class="tarjeta" style="text-align:center;">
+        <div style="font-size:13px; color:var(--gris); font-weight:600;">
+          ¿La cámara no enfoca el código?
+        </div>
+        <button class="btn btn-secundario" id="btn-reiniciar">Reiniciar cámara</button>
+      </div>
+    </div>
+
+    <nav class="navinferior">
+      <a class="navitem" href="index.html"><span class="icono">🏠</span>Inicio</a>
+      <a class="navitem activo" href="escanear.html"><span class="icono">📷</span>Escanear</a>
+      <a class="navitem" href="ventas.html"><span class="icono">🧾</span>Venta</a>
+      <a class="navitem" href="clientes.html"><span class="icono">🪪</span>Clientes</a>
+      <a class="navitem" href="reportes.html"><span class="icono">📊</span>Reportes</a>
+    </nav>
+  </div>
+
+  <script src="js/scanner.js"></script>
+</body>
+</html>

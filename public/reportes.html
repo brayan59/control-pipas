@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Reportes</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1>📊 Reportes</h1>
+      <div class="subtitulo">Corte de contrato vs venta directa</div>
+    </div>
+
+    <div class="contenido">
+      <div class="tarjeta">
+        <label>Desde</label>
+        <input type="date" id="desde">
+        <label>Hasta</label>
+        <input type="date" id="hasta">
+        <button class="btn btn-primario" id="btn-generar">Generar reporte</button>
+      </div>
+
+      <div id="resultado"></div>
+    </div>
+
+    <nav class="navinferior">
+      <a class="navitem" href="index.html"><span class="icono">🏠</span>Inicio</a>
+      <a class="navitem" href="escanear.html"><span class="icono">📷</span>Escanear</a>
+      <a class="navitem" href="ventas.html"><span class="icono">🧾</span>Venta</a>
+      <a class="navitem" href="clientes.html"><span class="icono">🪪</span>Clientes</a>
+      <a class="navitem activo" href="reportes.html"><span class="icono">📊</span>Reportes</a>
+    </nav>
+  </div>
+
+  <script src="js/reportes.js"></script>
+</body>
+</html>

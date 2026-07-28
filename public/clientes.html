@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Clientes con contrato</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1>🪪 Clientes</h1>
+      <div class="subtitulo">Alta de contratos y credenciales QR</div>
+    </div>
+
+    <div class="contenido">
+      <div class="tarjeta" id="tarjeta-login">
+        <label>Clave de administrador</label>
+        <input type="password" id="admin-key" placeholder="Clave">
+        <button class="btn btn-primario" id="btn-entrar">Entrar</button>
+        <div id="login-msg"></div>
+      </div>
+
+      <div id="panel" style="display:none;">
+        <div class="tarjeta">
+          <h3 style="margin-bottom:10px;">Nuevo cliente</h3>
+          <form id="form-cliente">
+            <label>Nombre del operador</label>
+            <input type="text" id="nombre" required>
+
+            <label>Placas de la pipa</label>
+            <input type="text" id="placas" required placeholder="Ej. ABC1234">
+
+            <label>Pozo / dueño con el que tiene trato (opcional)</label>
+            <input type="text" id="poso">
+
+            <button type="submit" class="btn btn-primario">Generar credencial QR</button>
+          </form>
+          <div id="resultado-alta"></div>
+        </div>
+
+        <div class="tarjeta">
+          <h3 style="margin-bottom:6px;">Clientes registrados</h3>
+          <ul class="lista-clientes" id="lista-clientes"></ul>
+        </div>
+      </div>
+    </div>
+
+    <nav class="navinferior">
+      <a class="navitem" href="index.html"><span class="icono">🏠</span>Inicio</a>
+      <a class="navitem" href="escanear.html"><span class="icono">📷</span>Escanear</a>
+      <a class="navitem" href="ventas.html"><span class="icono">🧾</span>Venta</a>
+      <a class="navitem activo" href="clientes.html"><span class="icono">🪪</span>Clientes</a>
+      <a class="navitem" href="reportes.html"><span class="icono">📊</span>Reportes</a>
+    </nav>
+  </div>
+
+  <script src="js/clientes.js"></script>
+</body>
+</html>
