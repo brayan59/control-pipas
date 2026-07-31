@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Cliente = require('../models/Cliente');
 const Registro = require('../models/Registro');
+const VentaDirecta = require('../models/VentaDirecta');
 
 // Se llama cada vez que se escanea un QR en la caseta
 router.post('/scan', async (req, res) => {
@@ -14,9 +15,29 @@ router.post('/scan', async (req, res) => {
       return res.status(404).json({ error: 'Credencial no reconocida. Verifica el QR.' });
     }
     if (!cliente.activo) {
-      return res.status(403).json({ error: `El contrato de ${cliente.nombre} está inactivo.` });
+      return res.status(403).json({ error: `La credencial de ${cliente.nombre} está inactiva.` });
     }
 
+    if (cliente.tipo === 'efectivo') {
+      // Cliente frecuente sin contrato: se registra como venta directa, pero con datos automáticos
+      const venta = new VentaDirecta({
+        cliente: cliente._id,
+        origen: 'qr_efectivo',
+        nombre: cliente.nombre,
+        placas: cliente.placas,
+      });
+      await venta.save();
+
+      return res.status(201).json({
+        mensaje: 'Venta en efectivo registrada',
+        tipo: 'efectivo',
+        nombre: cliente.nombre,
+        placas: cliente.placas,
+        fecha: venta.fecha,
+      });
+    }
+
+    // Cliente con contrato
     const registro = new Registro({
       cliente: cliente._id,
       nombre: cliente.nombre,
@@ -26,6 +47,7 @@ router.post('/scan', async (req, res) => {
 
     res.status(201).json({
       mensaje: 'Registro guardado',
+      tipo: 'contrato',
       nombre: cliente.nombre,
       placas: cliente.placas,
       fecha: registro.fecha,

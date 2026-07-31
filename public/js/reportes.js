@@ -30,6 +30,11 @@ async function generarReporte() {
       .map(([cliente, veces]) => `<tr><td>${cliente}</td><td>${veces}</td></tr>`)
       .join('');
 
+    const filasEfectivo = Object.entries(data.desgloseEfectivo)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cliente, veces]) => `<tr><td>${cliente}</td><td>${veces}</td></tr>`)
+      .join('');
+
     resultadoDiv.innerHTML = `
       <div class="tarjeta" id="area-imprimir">
         <h3>Corte del ${data.rango.desde} al ${data.rango.hasta}</h3>
@@ -40,7 +45,15 @@ async function generarReporte() {
           </div>
           <div class="stat">
             <div class="num">${data.totalVentaDirecta}</div>
-            <div class="lbl">Venta directa</div>
+            <div class="lbl">Venta directa (total)</div>
+          </div>
+          <div class="stat">
+            <div class="num">${data.totalVentaEfectivoQR}</div>
+            <div class="lbl">Efectivo frecuente (QR)</div>
+          </div>
+          <div class="stat">
+            <div class="num">${data.totalVentaManual}</div>
+            <div class="lbl">Nuevos / manual</div>
           </div>
           <div class="stat">
             <div class="num">${data.totalGeneral}</div>
@@ -56,6 +69,12 @@ async function generarReporte() {
         <table>
           <thead><tr><th>Cliente / placas</th><th>Llenados</th></tr></thead>
           <tbody>${filasDesglose || '<tr><td colspan="2">Sin registros en este rango.</td></tr>'}</tbody>
+        </table>
+
+        <h3 style="margin-top:18px;">Desglose por cliente frecuente (efectivo)</h3>
+        <table>
+          <thead><tr><th>Cliente</th><th>Veces</th></tr></thead>
+          <tbody>${filasEfectivo || '<tr><td colspan="2">Sin registros en este rango.</td></tr>'}</tbody>
         </table>
       </div>
       <button class="btn btn-secundario" id="btn-imprimir">Imprimir / guardar como PDF</button>

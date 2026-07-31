@@ -11,14 +11,21 @@ const clienteSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  tipo: {
+    type: String,
+    enum: ['contrato', 'efectivo'],
+    default: 'contrato',
+    // 'contrato': tiene trato con el dueño del pozo, se cuenta como registro de contrato
+    // 'efectivo': cliente frecuente sin contrato, paga en efectivo cada vez, se cuenta como venta directa
+  },
   placas: {
     type: String,
-    required: true,
     trim: true,
     uppercase: true,
+    default: '',
   },
   poso: {
-    type: String, // nombre del pozo/dueño con el que tiene el trato (opcional)
+    type: String, // nombre del pozo/dueño con el que tiene el trato (solo aplica a tipo 'contrato')
     trim: true,
     default: '',
   },

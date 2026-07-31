@@ -31,4 +31,15 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Eliminar una venta directa (por si se anotó mal)
+router.delete('/:id', async (req, res) => {
+  try {
+    const venta = await VentaDirecta.findByIdAndDelete(req.params.id);
+    if (!venta) return res.status(404).json({ error: 'Venta no encontrada' });
+    res.json({ mensaje: 'Venta eliminada', venta });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

@@ -25,13 +25,19 @@
         <div class="tarjeta">
           <h3 style="margin-bottom:10px;">Nuevo cliente</h3>
           <form id="form-cliente">
-            <label>Nombre del operador</label>
+            <label>Nombre del cliente</label>
             <input type="text" id="nombre" required>
 
-            <label>Placas de la pipa</label>
-            <input type="text" id="placas" required placeholder="Ej. ABC1234">
+            <label>Tipo de cliente</label>
+            <select id="tipo">
+              <option value="contrato">Contrato (trato con el pozo)</option>
+              <option value="efectivo">Efectivo (frecuente, sin contrato)</option>
+            </select>
 
-            <label>Pozo / dueño con el que tiene trato (opcional)</label>
+            <label>Placas de la pipa (opcional)</label>
+            <input type="text" id="placas" placeholder="Ej. ABC1234">
+
+            <label id="label-poso">Pozo / dueño con el que tiene trato (opcional)</label>
             <input type="text" id="poso">
 
             <button type="submit" class="btn btn-primario">Generar credencial QR</button>

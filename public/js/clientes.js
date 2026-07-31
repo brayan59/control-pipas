@@ -49,11 +49,12 @@ async function cargarClientes() {
     li.innerHTML = `
       <div>
         <strong>${c.nombre}</strong><br>
-        <span style="color:var(--gris); font-size:12px;">${c.placas}${c.poso ? ' · ' + c.poso : ''}</span>
+        <span style="color:var(--gris); font-size:12px;">${c.placas ? c.placas + ' · ' : ''}${c.tipo === 'efectivo' ? '💵 Efectivo' : '📋 Contrato'}${c.poso ? ' · ' + c.poso : ''}</span>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="badge ${c.activo ? 'activo' : 'inactivo'}">${c.activo ? 'Activo' : 'Inactivo'}</span>
         <button class="btn-ver-qr" data-id="${c._id}" style="border:none;background:none;font-size:20px;cursor:pointer;">🔳</button>
+        <button class="btn-borrar-cliente" data-id="${c._id}" data-nombre="${c.nombre}" style="border:none;background:none;font-size:18px;cursor:pointer;">🗑️</button>
       </div>
     `;
     listaClientes.appendChild(li);
@@ -62,6 +63,27 @@ async function cargarClientes() {
   document.querySelectorAll('.btn-ver-qr').forEach((btn) => {
     btn.addEventListener('click', () => verQr(btn.dataset.id));
   });
+
+  document.querySelectorAll('.btn-borrar-cliente').forEach((btn) => {
+    btn.addEventListener('click', () => borrarCliente(btn.dataset.id, btn.dataset.nombre));
+  });
+}
+
+async function borrarCliente(id, nombre) {
+  const confirmar = confirm(`¿Seguro que quieres borrar a "${nombre}"? Se eliminará su credencial (su historial de escaneos pasados se conserva).`);
+  if (!confirmar) return;
+
+  const resp = await fetch(`/api/clientes/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-key': getAdminKey() },
+  });
+  const data = await resp.json();
+
+  if (!resp.ok) {
+    alert(`Error: ${data.error}`);
+    return;
+  }
+  cargarClientes();
 }
 
 async function verQr(id) {
@@ -73,12 +95,12 @@ async function verQr(id) {
 
 function mostrarQr(cliente, qrDataUrl) {
   resultadoAlta.innerHTML = `
-    <div class="mensaje ok">✅ Credencial de ${cliente.nombre}</div>
+    <div class="mensaje ok">✅ Credencial de ${cliente.nombre} (${cliente.tipo === 'efectivo' ? '💵 Efectivo' : '📋 Contrato'})</div>
     <div class="qr-preview">
       <img src="${qrDataUrl}" alt="QR de ${cliente.nombre}">
       <div style="margin-top:8px; font-weight:700;">${cliente.nombre}</div>
-      <div style="color:var(--gris); font-size:13px;">${cliente.placas}</div>
-      <button class="btn btn-secundario" onclick="imprimirQr('${qrDataUrl}', '${cliente.nombre}', '${cliente.placas}')">Imprimir credencial</button>
+      ${cliente.placas ? `<div style="color:var(--gris); font-size:13px;">${cliente.placas}</div>` : ''}
+      <button class="btn btn-secundario" onclick="imprimirQr('${qrDataUrl}', '${cliente.nombre}', '${cliente.placas || ''}')">Imprimir credencial</button>
     </div>
   `;
   resultadoAlta.scrollIntoView({ behavior: 'smooth' });
@@ -105,6 +127,7 @@ document.getElementById('form-cliente').addEventListener('submit', async (e) => 
     nombre: document.getElementById('nombre').value.trim(),
     placas: document.getElementById('placas').value.trim(),
     poso: document.getElementById('poso').value.trim(),
+    tipo: document.getElementById('tipo').value,
   };
 
   const resp = await fetch('/api/clientes', {

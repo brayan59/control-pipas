@@ -13,16 +13,23 @@ function requiereAdmin(req, res, next) {
   next();
 }
 
-// Crear un nuevo cliente con contrato + generar su QR
+// Crear un nuevo cliente (contrato o efectivo) + generar su QR
 router.post('/', requiereAdmin, async (req, res) => {
   try {
-    const { nombre, placas, poso } = req.body;
-    if (!nombre || !placas) {
-      return res.status(400).json({ error: 'Nombre y placas son obligatorios' });
+    const { nombre, placas, poso, tipo } = req.body;
+    if (!nombre) {
+      return res.status(400).json({ error: 'El nombre es obligatorio' });
     }
+    const tipoFinal = tipo === 'efectivo' ? 'efectivo' : 'contrato';
 
     const codigo = uuidv4(); // identificador único que va dentro del QR
-    const cliente = new Cliente({ codigo, nombre, placas, poso: poso || '' });
+    const cliente = new Cliente({
+      codigo,
+      nombre,
+      placas: placas || '',
+      poso: poso || '',
+      tipo: tipoFinal,
+    });
     await cliente.save();
 
     // Generamos el QR como imagen dataURL (se puede imprimir directo desde el navegador)
@@ -62,16 +69,28 @@ router.get('/:id/qr', requiereAdmin, async (req, res) => {
 // Activar / desactivar un cliente (si ya no tiene contrato vigente)
 router.patch('/:id', requiereAdmin, async (req, res) => {
   try {
-    const { activo, nombre, placas, poso } = req.body;
+    const { activo, nombre, placas, poso, tipo } = req.body;
     const update = {};
     if (activo !== undefined) update.activo = activo;
     if (nombre !== undefined) update.nombre = nombre;
     if (placas !== undefined) update.placas = placas;
     if (poso !== undefined) update.poso = poso;
+    if (tipo !== undefined) update.tipo = tipo;
 
     const cliente = await Cliente.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' });
     res.json(cliente);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Eliminar un cliente por completo (borra la credencial, no los registros históricos de escaneo)
+router.delete('/:id', requiereAdmin, async (req, res) => {
+  try {
+    const cliente = await Cliente.findByIdAndDelete(req.params.id);
+    if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' });
+    res.json({ mensaje: 'Cliente eliminado', cliente });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

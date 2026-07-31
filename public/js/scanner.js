@@ -31,7 +31,9 @@ async function alEscanear(codigoTexto) {
       mostrarMensaje('error', `⚠️ ${data.error}`);
     } else {
       const hora = new Date(data.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-      mostrarMensaje('ok', `✅ ${data.nombre} — Placas ${data.placas}<br>Registrado a las ${hora}`);
+      const etiqueta = data.tipo === 'efectivo' ? '💵 Venta en efectivo' : '📋 Registro de contrato';
+      const placasTxt = data.placas ? ` — Placas ${data.placas}` : '';
+      mostrarMensaje('ok', `✅ ${etiqueta}<br>${data.nombre}${placasTxt}<br>Registrado a las ${hora}`);
       if (navigator.vibrate) navigator.vibrate(120);
     }
   } catch (err) {

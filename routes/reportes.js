@@ -30,15 +30,31 @@ router.get('/corte', async (req, res) => {
       porCliente[key] = (porCliente[key] || 0) + 1;
     });
 
+    // Desglose de ventas: separar las que vinieron de un QR de cliente "efectivo"
+    // de las que fueron captura manual de un cliente nuevo/único
+    const porClienteEfectivo = {};
+    let totalVentaManual = 0;
+    ventas.forEach((v) => {
+      if (v.origen === 'qr_efectivo') {
+        const key = v.placas ? `${v.nombre} (${v.placas})` : v.nombre;
+        porClienteEfectivo[key] = (porClienteEfectivo[key] || 0) + 1;
+      } else {
+        totalVentaManual += 1;
+      }
+    });
+
     const montoTotalVentas = ventas.reduce((acc, v) => acc + (v.monto || 0), 0);
 
     res.json({
       rango: { desde, hasta },
       totalContrato: registros.length,
       totalVentaDirecta: ventas.length,
+      totalVentaEfectivoQR: ventas.length - totalVentaManual,
+      totalVentaManual,
       totalGeneral: registros.length + ventas.length,
       montoTotalVentaDirecta: montoTotalVentas,
       desgloseContrato: porCliente,
+      desgloseEfectivo: porClienteEfectivo,
       registros,
       ventas,
     });
