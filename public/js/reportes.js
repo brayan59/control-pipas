@@ -35,6 +35,29 @@ async function generarReporte() {
       .map(([cliente, veces]) => `<tr><td>${cliente}</td><td>${veces}</td></tr>`)
       .join('');
 
+    const filasRegistrosIndividuales = data.registros
+      .map((r) => {
+        const hora = new Date(r.fecha).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        return `<tr>
+          <td>${r.nombre}${r.placas ? ' (' + r.placas + ')' : ''}</td>
+          <td>${hora}</td>
+          <td><button class="btn-borrar-registro" data-id="${r._id}" style="border:none;background:none;font-size:16px;cursor:pointer;">🗑️</button></td>
+        </tr>`;
+      })
+      .join('');
+
+    const filasVentasIndividuales = data.ventas
+      .map((v) => {
+        const hora = new Date(v.fecha).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const etiqueta = v.origen === 'qr_efectivo' ? '💵' : '🧾';
+        return `<tr>
+          <td>${etiqueta} ${v.nombre || 'Sin nombre'}</td>
+          <td>${hora}</td>
+          <td><button class="btn-borrar-venta-reporte" data-id="${v._id}" style="border:none;background:none;font-size:16px;cursor:pointer;">🗑️</button></td>
+        </tr>`;
+      })
+      .join('');
+
     resultadoDiv.innerHTML = `
       <div class="tarjeta" id="area-imprimir">
         <h3>Corte del ${data.rango.desde} al ${data.rango.hasta}</h3>
@@ -78,9 +101,32 @@ async function generarReporte() {
         </table>
       </div>
       <button class="btn btn-secundario" id="btn-imprimir">Imprimir / guardar como PDF</button>
+
+      <div class="tarjeta">
+        <h3>Registros de contrato (detalle)</h3>
+        <table>
+          <thead><tr><th>Cliente</th><th>Fecha</th><th></th></tr></thead>
+          <tbody>${filasRegistrosIndividuales || '<tr><td colspan="3">Sin registros.</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Ventas (detalle)</h3>
+        <table>
+          <thead><tr><th>Cliente</th><th>Fecha</th><th></th></tr></thead>
+          <tbody>${filasVentasIndividuales || '<tr><td colspan="3">Sin ventas.</td></tr>'}</tbody>
+        </table>
+      </div>
     `;
 
     document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
+
+    document.querySelectorAll('.btn-borrar-registro').forEach((btn) => {
+      btn.addEventListener('click', () => borrarRegistro(btn.dataset.id));
+    });
+    document.querySelectorAll('.btn-borrar-venta-reporte').forEach((btn) => {
+      btn.addEventListener('click', () => borrarVentaDesdeReporte(btn.dataset.id));
+    });
   } catch (err) {
     resultadoDiv.innerHTML = '<div class="mensaje error">⚠️ No se pudo conectar con el servidor.</div>';
   }
@@ -88,3 +134,49 @@ async function generarReporte() {
 
 document.getElementById('btn-generar').addEventListener('click', generarReporte);
 generarReporte();
+
+function getAdminKey() {
+  let key = sessionStorage.getItem('adminKey');
+  if (!key) {
+    key = prompt('Ingresa la clave de administrador para borrar registros:');
+    if (key) sessionStorage.setItem('adminKey', key);
+  }
+  return key;
+}
+
+async function borrarRegistro(id) {
+  const confirmar = confirm('¿Seguro que quieres borrar este registro de contrato?');
+  if (!confirmar) return;
+  const key = getAdminKey();
+  if (!key) return;
+
+  const resp = await fetch(`/api/registro/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-key': key },
+  });
+
+  if (resp.status === 401) {
+    sessionStorage.removeItem('adminKey');
+    alert('Clave incorrecta.');
+    return;
+  }
+  if (!resp.ok) {
+    const data = await resp.json();
+    alert(`Error: ${data.error}`);
+    return;
+  }
+  generarReporte();
+}
+
+async function borrarVentaDesdeReporte(id) {
+  const confirmar = confirm('¿Seguro que quieres borrar esta venta?');
+  if (!confirmar) return;
+
+  const resp = await fetch(`/api/ventas/${id}`, { method: 'DELETE' });
+  if (!resp.ok) {
+    const data = await resp.json();
+    alert(`Error: ${data.error}`);
+    return;
+  }
+  generarReporte();
+}

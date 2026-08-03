@@ -6,6 +6,9 @@ const VentaDirecta = require('../models/VentaDirecta');
 router.post('/', async (req, res) => {
   try {
     const { nombre, placas, monto, notas, registradoPor } = req.body;
+    if (!nombre || !nombre.trim()) {
+      return res.status(400).json({ error: 'El nombre es obligatorio' });
+    }
     const venta = new VentaDirecta({ nombre, placas, monto, notas, registradoPor });
     await venta.save();
     res.status(201).json(venta);

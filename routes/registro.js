@@ -4,6 +4,14 @@ const Cliente = require('../models/Cliente');
 const Registro = require('../models/Registro');
 const VentaDirecta = require('../models/VentaDirecta');
 
+function requiereAdmin(req, res, next) {
+  const key = req.headers['x-admin-key'];
+  if (!process.env.ADMIN_KEY || key !== process.env.ADMIN_KEY) {
+    return res.status(401).json({ error: 'Clave de administrador inválida' });
+  }
+  next();
+}
+
 // Se llama cada vez que se escanea un QR en la caseta
 router.post('/scan', async (req, res) => {
   try {
@@ -69,6 +77,17 @@ router.get('/', async (req, res) => {
     }
     const registros = await Registro.find(filtro).sort({ fecha: -1 }).limit(500);
     res.json(registros);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Eliminar un registro individual (por ejemplo, pruebas o errores de escaneo)
+router.delete('/:id', requiereAdmin, async (req, res) => {
+  try {
+    const registro = await Registro.findByIdAndDelete(req.params.id);
+    if (!registro) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json({ mensaje: 'Registro eliminado', registro });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
