@@ -6,8 +6,13 @@ const resultadoDiv = document.getElementById('resultado');
 const hoy = new Date();
 const hace7 = new Date();
 hace7.setDate(hoy.getDate() - 6);
-inputHasta.value = hoy.toISOString().slice(0, 10);
+const hoyStr = hoy.toISOString().slice(0, 10);
+inputHasta.value = hoyStr;
 inputDesde.value = hace7.toISOString().slice(0, 10);
+
+// No dejar elegir fechas futuras
+inputDesde.setAttribute('max', hoyStr);
+inputHasta.setAttribute('max', hoyStr);
 
 async function generarReporte() {
   const desde = inputDesde.value;
@@ -50,9 +55,11 @@ async function generarReporte() {
       .map((v) => {
         const hora = new Date(v.fecha).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         const etiqueta = v.origen === 'qr_efectivo' ? '💵' : '🧾';
+        const montoTxt = v.monto ? `$${v.monto.toFixed(2)}` : '—';
         return `<tr>
           <td>${etiqueta} ${v.nombre || 'Sin nombre'}</td>
           <td>${hora}</td>
+          <td>${montoTxt}</td>
           <td><button class="btn-borrar-venta-reporte" data-id="${v._id}" style="border:none;background:none;font-size:16px;cursor:pointer;">🗑️</button></td>
         </tr>`;
       })
@@ -113,8 +120,8 @@ async function generarReporte() {
       <div class="tarjeta">
         <h3>Ventas (detalle)</h3>
         <table>
-          <thead><tr><th>Cliente</th><th>Fecha</th><th></th></tr></thead>
-          <tbody>${filasVentasIndividuales || '<tr><td colspan="3">Sin ventas.</td></tr>'}</tbody>
+          <thead><tr><th>Cliente</th><th>Fecha</th><th>Monto</th><th></th></tr></thead>
+          <tbody>${filasVentasIndividuales || '<tr><td colspan="4">Sin ventas.</td></tr>'}</tbody>
         </table>
       </div>
     `;

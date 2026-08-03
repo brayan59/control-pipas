@@ -45,4 +45,20 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Actualizar una venta existente (por ejemplo, poner el monto después de escanear)
+router.patch('/:id', async (req, res) => {
+  try {
+    const { monto, notas } = req.body;
+    const update = {};
+    if (monto !== undefined) update.monto = monto;
+    if (notas !== undefined) update.notas = notas;
+
+    const venta = await VentaDirecta.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!venta) return res.status(404).json({ error: 'Venta no encontrada' });
+    res.json(venta);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

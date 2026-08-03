@@ -39,6 +39,7 @@ router.post('/scan', async (req, res) => {
       return res.status(201).json({
         mensaje: 'Venta en efectivo registrada',
         tipo: 'efectivo',
+        id: venta._id,
         nombre: cliente.nombre,
         placas: cliente.placas,
         fecha: venta.fecha,
